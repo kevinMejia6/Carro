@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ahorrando para mi Carro</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-lg">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="bi bi-car-front-fill me-2 fs-4"></i>
+                Ahorrando para mi Carro
+            </a>
+            <button class="btn btn-outline-light btn-sm" id="resetDataBtn">
+                <i class="bi bi-trash me-1"></i> Reiniciar Datos
+            </button>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <div class="container my-4">
+        
+        <!-- Sección de Configuración de Meta (si no existe) -->
+        <div id="setupSection" class="card shadow-lg mb-4" style="display: none;">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-gear-fill me-2"></i>Configurar Meta de Ahorro</h4>
+            </div>
+            <div class="card-body">
+                <form id="setupForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="carName" class="form-label">Nombre del Carro *</label>
+                            <input type="text" class="form-control" id="carName" required placeholder="Ej: Toyota Corolla 2024">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="carGoal" class="form-label">Precio/Meta ($) *</label>
+                            <input type="number" class="form-control" id="carGoal" required placeholder="Ej: 25000" min="1">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="carDescription" class="form-label">Descripción o Notas</label>
+                        <textarea class="form-control" id="carDescription" rows="2" placeholder="Detalles adicionales sobre el carro..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="carImages" class="form-label">Fotos del Carro</label>
+                        <input type="file" class="form-control" id="carImages" multiple accept="image/*">
+                        <small class="text-muted">Puedes seleccionar múltiples imágenes</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>Guardar Configuración
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dashboard Principal -->
+        <div id="dashboardSection" style="display: none;">
+            
+            <!-- Tarjetas de Resumen -->
+            <div class="row mb-4">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card card-summary bg-primary text-white h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle mb-2"><i class="bi bi-target me-1"></i>Meta Total</h6>
+                                    <h3 class="card-title mb-0" id="summaryGoal">$0</h3>
+                                </div>
+                                <i class="bi bi-car-front-fill fs-1 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card card-summary bg-success text-white h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle mb-2"><i class="bi bi-piggy-bank me-1"></i>Total Ahorrado</h6>
+                                    <h3 class="card-title mb-0" id="summarySaved">$0</h3>
+                                </div>
+                                <i class="bi bi-cash-coin fs-1 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card card-summary bg-warning text-dark h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle mb-2"><i class="bi bi-arrow-down-circle me-1"></i>Faltante</h6>
+                                    <h3 class="card-title mb-0" id="summaryRemaining">$0</h3>
+                                </div>
+                                <i class="bi bi-graph-down fs-1 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card card-summary bg-info text-white h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle mb-2"><i class="bi bi-graph-up me-1"></i>Avance</h6>
+                                    <h3 class="card-title mb-0" id="summaryProgress">0%</h3>
+                                </div>
+                                <i class="bi bi-trophy fs-1 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barra de Progreso -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-gradient">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Progreso de Ahorro</h5>
+                </div>
+                <div class="card-body">
+                    <div class="progress-container">
+                        <div class="progress mb-3" style="height: 30px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 id="progressBar" 
+                                 role="progressbar" 
+                                 style="width: 0%;"
+                                 aria-valuenow="0" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                <span id="progressText">0%</span>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted small">
+                            <span id="progressSavedText">$0 ahorrado</span>
+                            <span id="progressGoalText">$0 meta</span>
+                        </div>
+                    </div>
+                    <!-- Mensaje de Felicitación -->
+                    <div id="congratulationsMessage" class="alert alert-success mt-3 d-none text-center">
+                        <h5 class="alert-heading">
+                            <i class="bi bi-confetti-fill me-2"></i>¡Felicidades!
+                        </h5>
+                        <p>¡Has alcanzado tu meta de ahorro para comprar tu carro!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Información del Carro y Fotos -->
+            <div class="row mb-4">
+                <div class="col-lg-5 mb-3">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información del Carro</h5>
+                            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#editGoalModal">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title text-primary" id="carNameDisplay">-</h4>
+                            <p class="card-text text-muted" id="carDescriptionDisplay">-</p>
+                            <hr>
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <small class="text-muted">Precio Meta</small>
+                                    <h5 class="text-primary" id="carGoalDisplay">$0</h5>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Aportes Realizados</small>
+                                    <h5 class="text-success" id="contributionsCount">0</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7 mb-3">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="bi bi-images me-2"></i>Fotos del Carro</h5>
+                            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addImageModal">
+                                <i class="bi bi-plus-circle"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="mainImageContainer" class="text-center mb-3">
+                                <img id="mainImage" src="" alt="Imagen principal del carro" class="img-fluid rounded shadow" style="max-height: 250px; object-fit: cover;">
+                            </div>
+                            <div id="imagesGallery" class="row g-2">
+                                <!-- Galería de imágenes -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas Adicionales -->
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    <div class="card shadow">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="mb-0"><i class="bi bi-calculator me-2"></i>Estadísticas de Ahorro</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6 mb-2">
+                                    <small class="text-muted">Promedio por Aporte</small>
+                                    <p class="mb-0 fw-bold" id="avgSavings">$0</p>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <small class="text-muted">Mayor Aporte</small>
+                                    <p class="mb-0 fw-bold" id="maxSavings">$0</p>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <small class="text-muted">Último Ahorro</small>
+                                    <p class="mb-0 fw-bold" id="lastSavings">$0</p>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <small class="text-muted">Fecha Último Aporte</small>
+                                    <p class="mb-0 fw-bold" id="lastSavingsDate">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card shadow">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Proyección de Tiempo</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center">
+                                <p class="mb-2 text-muted">Basado en tu promedio de ahorro:</p>
+                                <h4 class="text-primary" id="timeEstimate">-</h4>
+                                <small class="text-muted" id="timeEstimateDetail"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de Nuevo Ahorro -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Registrar Nuevo Ahorro</h5>
+                </div>
+                <div class="card-body">
+                    <form id="savingsForm">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="savingsAmount" class="form-label">Monto Ahorrado ($) *</label>
+                                <input type="number" class="form-control" id="savingsAmount" required min="0.01" step="0.01" placeholder="Ej: 500">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="savingsDate" class="form-label">Fecha *</label>
+                                <input type="date" class="form-control" id="savingsDate" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="savingsNote" class="form-label">Nota/Descripción</label>
+                                <input type="text" class="form-control" id="savingsNote" placeholder="Ej: Ahorro semanal">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle me-1"></i>Guardar Ahorro
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Historial de Ahorros -->
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Historial de Ahorros</h5>
+                    <span class="badge bg-light text-dark" id="historyCount">0 registros</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped" id="savingsTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Fecha</th>
+                                    <th>Monto</th>
+                                    <th>Nota</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="savingsTableBody">
+                                <!-- Filas de la tabla -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Vista móvil -->
+                    <div id="savingsCards" class="d-md-none">
+                        <!-- Cards para móvil -->
+                    </div>
+                    <!-- Mensaje cuando no hay ahorros -->
+                    <div id="noSavingsMessage" class="text-center py-5 d-none">
+                        <i class="bi bi-inbox fs-1 text-muted"></i>
+                        <p class="text-muted mt-2">No hay ahorros registrados aún</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Meta -->
+    <div class="modal fade" id="editGoalModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Editar Meta</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editGoalForm">
+                        <div class="mb-3">
+                            <label for="editCarName" class="form-label">Nombre del Carro</label>
+                            <input type="text" class="form-control" id="editCarName">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCarGoal" class="form-label">Precio/Meta ($)</label>
+                            <input type="number" class="form-control" id="editCarGoal" min="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCarDescription" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="editCarDescription" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveGoalEdit">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Imagen -->
+    <div class="modal fade" id="addImageModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Agregar Nueva Foto</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addImageForm">
+                        <div class="mb-3">
+                            <label for="newImage" class="form-label">Seleccionar Imagen</label>
+                            <input type="file" class="form-control" id="newImage" accept="image/*" required>
+                            <small class="text-muted">La imagen se guardará en el navegador</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveImageBtn">Agregar Imagen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Ahorro -->
+    <div class="modal fade" id="editSavingsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Editar Ahorro</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editSavingsForm">
+                        <input type="hidden" id="editSavingsId">
+                        <div class="mb-3">
+                            <label for="editSavingsAmount" class="form-label">Monto Ahorrado ($)</label>
+                            <input type="number" class="form-control" id="editSavingsAmount" min="0.01" step="0.01">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editSavingsDate" class="form-label">Fecha</label>
+                            <input type="date" class="form-control" id="editSavingsDate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editSavingsNote" class="form-label">Nota/Descripción</label>
+                            <input type="text" class="form-control" id="editSavingsNote">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="saveSavingsEdit">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast de Notificaciones -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toastNotification" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong class="me-auto" id="toastTitle">Notificación</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toastMessage">
+                Mensaje
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Aplicación Principal -->
+    <script src="app.js"></script>
+</body>
+</html>
